@@ -1,9 +1,10 @@
-package main
+package cmd
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/FrancescoIlario/gocg/cg"
 	"github.com/spf13/cobra"
 )
 
@@ -40,18 +41,18 @@ func rootCmdParseArgs(cmd *cobra.Command, args []string) error {
 }
 
 func rootCmdRun(cmd *cobra.Command, args []string) {
-	if err := processTemplates(configFilePath, tmpldir); err != nil {
+	if err := processTemplates(outdir, configFilePath, tmpldir); err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 	}
 }
 
-func processTemplates(config, templates string) error {
-	data, err := readConfig(config)
+func processTemplates(outdir, config, templates string) error {
+	data, err := cg.ReadConfig(config)
 	if err != nil {
 		return fmt.Errorf("error reading configuration %s", config)
 	}
 
-	if err := walk(templates, data); err != nil {
+	if err := cg.Walk(outdir, templates, data); err != nil {
 		return fmt.Errorf("error walking into template dir %s", templates)
 	}
 	return nil
@@ -85,9 +86,6 @@ func init() {
 }
 
 // Execute ...
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
