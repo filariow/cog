@@ -29,14 +29,20 @@ var rootCmd = &cobra.Command{
 }
 
 func rootCmdParseArgs(cmd *cobra.Command, args []string) error {
-	if len(args) < 1 && !existsDefaultTemplateDir() {
+	if len(args) >= 1 {
+		tmpldir = args[0]
+		if !existsDir(tmpldir) {
+			return fmt.Errorf("template directory not found: %s", tmpldir)
+		}
+		return nil
+	}
+
+	ok, fdir := existsDefaultTemplateDirs()
+	if !ok {
 		return fmt.Errorf("template directory not found")
 	}
 
-	tmpldir = args[0]
-	if !existsDir(tmpldir) {
-		return fmt.Errorf("template directory not found: %s", tmpldir)
-	}
+	tmpldir = *fdir
 	return nil
 }
 
@@ -53,22 +59,22 @@ func processTemplates(outdir, config, templates string) error {
 	}
 
 	if err := cg.Walk(outdir, templates, data); err != nil {
-		return fmt.Errorf("error walking into template dir %s", templates)
+		return fmt.Errorf("error walking into template dir %s: %v", templates, err)
 	}
 	return nil
 }
 
-func existsDefaultTemplateDir() bool {
+func existsDefaultTemplateDirs() (bool, *string) {
 	return existsOneDir(templateDirs...)
 }
 
-func existsOneDir(paths ...string) bool {
+func existsOneDir(paths ...string) (bool, *string) {
 	for _, path := range paths {
 		if d := existsDir(path); d {
-			return true
+			return true, &path
 		}
 	}
-	return false
+	return false, nil
 }
 
 func existsDir(path string) bool {
