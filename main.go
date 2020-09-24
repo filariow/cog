@@ -12,11 +12,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	outdir         = "./out/"
-	configFilePath = "./config.yaml"
-)
-
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "fatal error: %s", err.Error())
@@ -25,12 +20,7 @@ func main() {
 }
 
 func run() error {
-	data, err := readConfig(configFilePath)
-	if err != nil {
-		return err
-	}
-
-	return walk("./tmpl/", data)
+	return rootCmd.Execute()
 }
 
 func walk(baseDir string, data map[string]interface{}) error {
@@ -52,7 +42,7 @@ func step(elPath string, info os.FileInfo, data map[string]interface{}, err erro
 }
 
 func createDir(dirPath string, info os.FileInfo, data map[string]interface{}) error {
-	fpath, err := finalPath(dirPath, data)
+	fpath, err := produceOutputPath(dirPath, data)
 	if err != nil {
 		return err
 	}
@@ -60,7 +50,7 @@ func createDir(dirPath string, info os.FileInfo, data map[string]interface{}) er
 }
 
 func processFile(filePath string, info os.FileInfo, data map[string]interface{}) error {
-	fpath, err := finalPath(filePath, data)
+	fpath, err := produceOutputPath(filePath, data)
 	if err != nil {
 		return err
 	}
@@ -79,7 +69,7 @@ func processFile(filePath string, info os.FileInfo, data map[string]interface{})
 	return ioutil.WriteFile(*fpath, []byte(*tfContent), info.Mode().Perm())
 }
 
-func finalPath(elPath string, data map[string]interface{}) (*string, error) {
+func produceOutputPath(elPath string, data map[string]interface{}) (*string, error) {
 	procPath, err := applyTemplateToPath(&elPath, data)
 	if err != nil {
 		return nil, err
