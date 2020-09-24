@@ -3,11 +3,11 @@ package cg
 import (
 	"bytes"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"text/template"
 
 	"gopkg.in/yaml.v3"
 )
@@ -68,12 +68,12 @@ func produceOutputPath(outdir, elPath string, data map[string]interface{}) (*str
 }
 
 func applyTemplateToPath(path *string, data map[string]interface{}) (*string, error) {
-	t := template.New("Path")
+	t := template.New("Path").Funcs(FMap)
 	return applyTemplate(t, path, data)
 }
 
 func applyTemplateToContent(content *string, data map[string]interface{}) (*string, error) {
-	t := template.New("FileContent")
+	t := template.New("FileContent").Funcs(FMap)
 	return applyTemplate(t, content, data)
 }
 
