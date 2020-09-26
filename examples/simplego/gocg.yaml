@@ -1,0 +1,12 @@
+name: simplego
+go:
+  mod: gi/simplego
+  ver: 1.15
+pkg:
+  name: hello
+  func: Greet
+  message:
+    words:
+    - hi
+    - hello
+    - goodbye
