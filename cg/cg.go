@@ -2,32 +2,33 @@ package cg
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"gopkg.in/yaml.v3"
 )
 
+// Walk ...
 func Walk(outdir, baseDir string, data map[string]interface{}) error {
 	return filepath.Walk(baseDir, func(elPath string, info os.FileInfo, err error) error {
-		return step(outdir, elPath, info, data, err)
+		return step(outdir, elPath, baseDir, info, data, err)
 	})
 }
 
-func step(outdir, elPath string, info os.FileInfo, data map[string]interface{}, err error) error {
-	fmt.Println(elPath)
+func step(outdir, elPath, baseDir string, info os.FileInfo, data map[string]interface{}, err error) error {
 	if err != nil {
 		return err
 	}
 
 	if info.IsDir() {
+		elPath = strings.TrimPrefix(elPath, baseDir)
 		return createDir(outdir, elPath, info, data)
 	}
-	return processFile(outdir, elPath, info, data)
+	return processFile(outdir, elPath, baseDir, info, data)
 }
 
 func createDir(outdir, dirPath string, info os.FileInfo, data map[string]interface{}) error {
@@ -38,8 +39,10 @@ func createDir(outdir, dirPath string, info os.FileInfo, data map[string]interfa
 	return os.MkdirAll(*fpath, info.Mode().Perm())
 }
 
-func processFile(outdir, filePath string, info os.FileInfo, data map[string]interface{}) error {
-	fpath, err := produceOutputPath(outdir, filePath, data)
+func processFile(outdir, filePath, baseDir string, info os.FileInfo, data map[string]interface{}) error {
+	fp2 := strings.TrimPrefix(filePath, baseDir)
+	fp2 = strings.TrimLeft(fp2, "/")
+	fpath, err := produceOutputPath(outdir, fp2, data)
 	if err != nil {
 		return err
 	}
@@ -50,6 +53,10 @@ func processFile(outdir, filePath string, info os.FileInfo, data map[string]inte
 	}
 
 	fcontent, err := ioutil.ReadAll(readFile)
+	if err != nil {
+		return err
+	}
+
 	fcontentStr := string(fcontent)
 	tfContent, err := applyTemplateToContent(&fcontentStr, data)
 	if err != nil {
@@ -58,8 +65,8 @@ func processFile(outdir, filePath string, info os.FileInfo, data map[string]inte
 	return ioutil.WriteFile(*fpath, []byte(*tfContent), info.Mode().Perm())
 }
 
-func produceOutputPath(outdir, elPath string, data map[string]interface{}) (*string, error) {
-	procPath, err := applyTemplateToPath(&elPath, data)
+func produceOutputPath(outdir, dirPath string, data map[string]interface{}) (*string, error) {
+	procPath, err := applyTemplateToPath(&dirPath, data)
 	if err != nil {
 		return nil, err
 	}
@@ -68,12 +75,12 @@ func produceOutputPath(outdir, elPath string, data map[string]interface{}) (*str
 }
 
 func applyTemplateToPath(path *string, data map[string]interface{}) (*string, error) {
-	t := template.New("Path").Funcs(FMap)
+	t := template.New("Path").Funcs(fmap)
 	return applyTemplate(t, path, data)
 }
 
 func applyTemplateToContent(content *string, data map[string]interface{}) (*string, error) {
-	t := template.New("FileContent").Funcs(FMap)
+	t := template.New("FileContent").Funcs(fmap)
 	return applyTemplate(t, content, data)
 }
 
@@ -91,6 +98,7 @@ func applyTemplate(t *template.Template, value *string, data map[string]interfac
 	return &content, nil
 }
 
+// ReadConfig reads the config file and returns a map
 func ReadConfig(path string) (map[string]interface{}, error) {
 	configFile, err := os.Open(path)
 	if err != nil {
@@ -102,9 +110,9 @@ func ReadConfig(path string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var configDS map[string]interface{}
-	if err := yaml.Unmarshal(configData, &configDS); err != nil {
+	var configMap map[string]interface{}
+	if err := yaml.Unmarshal(configData, &configMap); err != nil {
 		return nil, err
 	}
-	return configDS, nil
+	return configMap, nil
 }

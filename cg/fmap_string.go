@@ -5,7 +5,7 @@ import (
 	"text/template"
 )
 
-var FMap = template.FuncMap{
+var fmap = template.FuncMap{
 	"lower": func(text string) string {
 		return strings.ToLower(text)
 	},

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/FrancescoIlario/gocg/cmd"
@@ -9,7 +8,6 @@ import (
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "fatal error: %s", err.Error())
 		os.Exit(1)
 	}
 }
