@@ -26,19 +26,15 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gocg",
+	Use:   "gocg [flags] PATH",
 	Short: "gocg go-code-generation",
-	Args:  rootCmdParseArgs,
+	Args:  cobra.ExactValidArgs(1),
 	RunE:  rootCmdRunE,
 }
 
-func rootCmdParseArgs(cmd *cobra.Command, args []string) error {
-	return parseInputs(args)
-}
-
-func parseInputs(args []string) error {
+func parseInputs(cmd *cobra.Command, args []string) error {
 	var err error
-	if context, err = parseContext(args, contextDefault); err != nil {
+	if context, err = parseContext(args); err != nil {
 		return err
 	}
 
@@ -52,9 +48,9 @@ func parseInputs(args []string) error {
 	return nil
 }
 
-func parseContext(args []string, def string) (string, error) {
-	if len(args) < 1 {
-		return def, nil
+func parseContext(args []string) (string, error) {
+	if len(args) == 0 {
+		return "", fmt.Errorf("no context provided")
 	}
 
 	ctx := args[0]
@@ -89,6 +85,9 @@ func parseConfigFilePath(basePath string) (string, error) {
 }
 
 func rootCmdRunE(cmd *cobra.Command, args []string) error {
+	if err := parseInputs(cmd, args); err != nil {
+		return err
+	}
 	outputFolder = strings.TrimPrefix(outputFolder, "./")
 	templateContext = strings.TrimPrefix(templateContext, "./")
 	return processTemplates(outputFolder, configFilePath, templateContext)
