@@ -1,0 +1,118 @@
+on:
+  push:
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Release assets
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+      - shell: bash
+        run: |
+          echo "${{ steps.create_release.outputs.upload_url }}" > upload_url.txt
+      - name: Upload artifact release url
+        uses: actions/upload-artifact@v1
+        with:
+          name: upload_url
+          path: upload_url.txt
+  
+  build:
+    needs: [release]
+    name: Deploy releases
+    strategy:
+      matrix:
+        os: ["windows", "linux"]
+        arch: ["386", "amd64"]
+    runs-on: ubuntu-latest
+    env:
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+    steps:
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v1
+        with:
+          name: upload_url
+      - shell: bash
+        run: |
+          value=`cat upload_url/upload_url.txt`
+          echo "::set-env name=UPLOAD_URL::$value"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.15.2
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+      - name: Build
+        run: |
+          go build -v -o gocg ./main.go 
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./gocg
+          asset_name: gocg-${{ env.GOOS }}-${{ env.GOARCH }}
+          asset_content_type: application/zip
+  
+  builddarwin:
+    needs: [release]
+    name: Deploy releases (darwin amd64)
+    runs-on: ubuntu-latest
+    env:
+      GOOS: "darwin"
+      GOARCH: "amd64"
+    steps:
+      - name: Download math result for job 1
+        uses: actions/download-artifact@v1
+        with:
+          name: upload_url
+      - shell: bash
+        run: |
+          value=`cat upload_url/upload_url.txt`
+          echo "::set-env name=UPLOAD_URL::$value"
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.15.2
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+      - name: Build
+        run: |
+          go build -v -o gocg ./main.go 
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ env.UPLOAD_URL }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./gocg
+          asset_name: gocg-${{ env.GOOS }}-${{ env.GOARCH }}
+          asset_content_type: application/zip
