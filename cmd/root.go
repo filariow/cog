@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/FrancescoIlario/gocg/cg"
+	"github.com/FrancescoIlario/gocg/dotted"
+	"github.com/imdario/mergo"
 	"github.com/spf13/cobra"
 )
 
@@ -23,6 +25,7 @@ var (
 	configFilePath     string
 	templateFolderName string
 	templateContext    string
+	set                []string
 )
 
 var rootCmd = &cobra.Command{
@@ -84,6 +87,20 @@ func parseConfigFilePath(basePath string) (string, error) {
 	return cfp, err
 }
 
+func applySetToConfig(m map[string]interface{}) error {
+	for _, s := range set {
+		dm, err := dotted.ToMap(s)
+		if err != nil {
+			return err
+		}
+
+		if err := mergo.Merge(&m, dm, mergo.WithOverride); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func rootCmdRunE(cmd *cobra.Command, args []string) error {
 	if err := parseInputs(cmd, args); err != nil {
 		return err
@@ -97,6 +114,9 @@ func processTemplates(outdir, config, templates string) error {
 	configData, err := cg.ReadConfig(config)
 	if err != nil {
 		return fmt.Errorf("error reading configuration %s", config)
+	}
+	if err := applySetToConfig(configData); err != nil {
+		return err
 	}
 
 	if err := cg.Walk(outdir, templates, configData); err != nil {
@@ -114,6 +134,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFolder, "outdir", "o", outputFolderDefault, "The path where to store the generated code")
 	rootCmd.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "The path to the config file to use (default gocg.yaml in context folder)")
 	rootCmd.PersistentFlags().StringVarP(&templateFolderName, "template", "t", templateFolderDefault, "The template folder in the context one")
+	rootCmd.Flags().StringArrayVarP(&set, "set", "s", []string{}, "override a prop from yaml (path.to.key=value)")
 
 	rootCmd.MarkFlagRequired("outdir")
 }
