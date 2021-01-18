@@ -1,6 +1,6 @@
 name: simplego
 go:
-  mod: gi/simplego
+  mod: go/simplego
   ver: 1.15
 pkg:
   name: hello
