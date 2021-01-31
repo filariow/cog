@@ -2,6 +2,7 @@ package cg
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -13,13 +14,13 @@ import (
 )
 
 // Walk ...
-func Walk(outdir, baseDir string, data map[string]interface{}) error {
+func Walk(outdir, baseDir string, data map[string]interface{}, extension string) error {
 	return filepath.Walk(baseDir, func(elPath string, info os.FileInfo, err error) error {
-		return step(outdir, elPath, baseDir, info, data, err)
+		return step(outdir, elPath, baseDir, info, data, extension, err)
 	})
 }
 
-func step(outdir, elPath, baseDir string, info os.FileInfo, data map[string]interface{}, err error) error {
+func step(outdir, elPath, baseDir string, info os.FileInfo, data map[string]interface{}, extension string, err error) error {
 	if err != nil {
 		return err
 	}
@@ -28,7 +29,7 @@ func step(outdir, elPath, baseDir string, info os.FileInfo, data map[string]inte
 		elPath = strings.TrimPrefix(elPath, baseDir)
 		return createDir(outdir, elPath, info, data)
 	}
-	return processFile(outdir, elPath, baseDir, info, data)
+	return processFile(outdir, elPath, baseDir, info, data, extension)
 }
 
 func createDir(outdir, dirPath string, info os.FileInfo, data map[string]interface{}) error {
@@ -39,7 +40,7 @@ func createDir(outdir, dirPath string, info os.FileInfo, data map[string]interfa
 	return os.MkdirAll(*fpath, info.Mode().Perm())
 }
 
-func processFile(outdir, filePath, baseDir string, info os.FileInfo, data map[string]interface{}) error {
+func processFile(outdir, filePath, baseDir string, info os.FileInfo, data map[string]interface{}, extension string) error {
 	fp2 := strings.TrimPrefix(filePath, baseDir)
 	fp2 = strings.TrimLeft(fp2, "/")
 	fpath, err := produceOutputPath(outdir, fp2, data)
@@ -58,11 +59,18 @@ func processFile(outdir, filePath, baseDir string, info os.FileInfo, data map[st
 	}
 
 	fcontentStr := string(fcontent)
+	ts := fmt.Sprintf(".%s", extension)
+	if !strings.HasSuffix(*fpath, ts) {
+		return ioutil.WriteFile(*fpath, []byte(fcontentStr), info.Mode().Perm())
+	}
+
 	tfContent, err := applyTemplateToContent(&fcontentStr, data)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(*fpath, []byte(*tfContent), info.Mode().Perm())
+
+	tfpath := strings.TrimSuffix(*fpath, ts)
+	return ioutil.WriteFile(tfpath, []byte(*tfContent), info.Mode().Perm())
 }
 
 func produceOutputPath(outdir, dirPath string, data map[string]interface{}) (*string, error) {
