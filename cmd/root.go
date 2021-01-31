@@ -26,6 +26,7 @@ var (
 	templateFolderName string
 	templateContext    string
 	set                []string
+	ext                string
 )
 
 var rootCmd = &cobra.Command{
@@ -119,7 +120,7 @@ func processTemplates(outdir, config, templates string) error {
 		return err
 	}
 
-	if err := cg.Walk(outdir, templates, configData); err != nil {
+	if err := cg.Walk(outdir, templates, configData, ext); err != nil {
 		return fmt.Errorf("error walking into template dir %s: %v", templates, err)
 	}
 	return nil
@@ -135,6 +136,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "The path to the config file to use (default gocg.yaml in context folder)")
 	rootCmd.PersistentFlags().StringVarP(&templateFolderName, "template", "t", templateFolderDefault, "The template folder in the context one")
 	rootCmd.Flags().StringArrayVarP(&set, "set", "s", []string{}, "override a prop from yaml (path.to.key=value)")
+	rootCmd.Flags().StringVarP(&ext, "ext", "e", "t", "set the extension of the template files")
 
 	rootCmd.MarkFlagRequired("outdir")
 }
