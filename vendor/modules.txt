@@ -6,7 +6,7 @@ github.com/inconshreveable/mousetrap
 # github.com/matryer/is v1.4.0
 ## explicit
 github.com/matryer/is
-# github.com/spf13/cobra v1.1.1
+# github.com/spf13/cobra v1.1.2
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
