@@ -3,4 +3,6 @@ go.sum
 # IDE
 .vscode
 
-out/
+out
+bin
+
