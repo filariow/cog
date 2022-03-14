@@ -15,7 +15,7 @@ You can refer to the project's [GitHub release page](https://github.com/filariow
 ### Using Go
 
 ```
-go get -u -v github.com/FrancescoIlario/cog
+go get -u -v github.com/filariow/cog
 ```
 
 ## Run the example
@@ -23,7 +23,7 @@ go get -u -v github.com/FrancescoIlario/cog
 Clone the repository in a local directory
 
 ```
-git clone https://github.com/FrancescoIlario/cog.git
+git clone https://github.com/filariow/cog.git
 cd cog
 ```
 
