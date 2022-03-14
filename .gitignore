@@ -5,4 +5,5 @@ go.sum
 
 out
 bin
+vendor
 
