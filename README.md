@@ -10,7 +10,7 @@ A minimalist go tool to generate code from templates leveraging on the amazing g
 
 ### Prebuilt binary
 
-You can refer to the project's [GitHub release page](https://github.com/FrancescoIlario/cog/releases).
+You can refer to the project's [GitHub release page](https://github.com/filariow/cog/releases).
 
 ### Using Go
 
