@@ -1,4 +1,4 @@
-# gocg : go code generation
+# CoG : Code Generator
 
 A minimalist go tool to generate code from templates leveraging on the amazing go template library
 
@@ -10,12 +10,12 @@ A minimalist go tool to generate code from templates leveraging on the amazing g
 
 ### Prebuilt binary
 
-You can refer to the project's [GitHub release page](https://github.com/FrancescoIlario/gocg/releases).
+You can refer to the project's [GitHub release page](https://github.com/FrancescoIlario/cog/releases).
 
 ### Using Go
 
 ```
-go get -u -v github.com/FrancescoIlario/gocg
+go get -u -v github.com/FrancescoIlario/cog
 ```
 
 ## Run the example
@@ -23,14 +23,14 @@ go get -u -v github.com/FrancescoIlario/gocg
 Clone the repository in a local directory
 
 ```
-git clone https://github.com/FrancescoIlario/gocg.git
-cd gocg
+git clone https://github.com/FrancescoIlario/cog.git
+cd cog
 ```
 
 Run the following command to generate the `simplego` example project from templates
 
 ```
-gocg ./examples/simplego
+cog ./examples/simplego
 ```
 
 You can run the generated code using the following commands

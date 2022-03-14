@@ -6,14 +6,14 @@ import (
 	"path"
 	"strings"
 
-	"github.com/FrancescoIlario/gocg/cg"
-	"github.com/FrancescoIlario/gocg/dotted"
+	"github.com/FrancescoIlario/cog/cg"
+	"github.com/FrancescoIlario/cog/dotted"
 	"github.com/imdario/mergo"
 	"github.com/spf13/cobra"
 )
 
 const (
-	configFileDefault     = "gocg.yaml"
+	configFileDefault     = "cog.yaml"
 	contextDefault        = "."
 	outputFolderDefault   = "./out/"
 	templateFolderDefault = "templates"
@@ -30,8 +30,8 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gocg [flags] PATH",
-	Short: "gocg go-code-generation",
+	Use:   "cog [flags] PATH",
+	Short: "cog go-code-generation",
 	Args:  cobra.ExactValidArgs(1),
 	RunE:  rootCmdRunE,
 }
@@ -133,7 +133,7 @@ func existsDir(path string) bool {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputFolder, "outdir", "o", outputFolderDefault, "The path where to store the generated code")
-	rootCmd.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "The path to the config file to use (default gocg.yaml in context folder)")
+	rootCmd.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "The path to the config file to use (default cog.yaml in context folder)")
 	rootCmd.PersistentFlags().StringVarP(&templateFolderName, "template", "t", templateFolderDefault, "The template folder in the context one")
 	rootCmd.Flags().StringArrayVarP(&set, "set", "s", []string{}, "override a prop from yaml (path.to.key=value)")
 	rootCmd.Flags().StringVarP(&ext, "ext", "e", "t", "set the extension of the template files")

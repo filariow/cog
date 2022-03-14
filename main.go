@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/FrancescoIlario/gocg/cmd"
+	"github.com/FrancescoIlario/cog/cmd"
 )
 
 func main() {

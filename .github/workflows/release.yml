@@ -63,8 +63,8 @@ jobs:
           fi
       - name: Build
         run: |
-          go build -v -o gocg ./main.go 
-          zip gocg.zip gocg
+          go build -v -o cog ./main.go 
+          zip cog.zip cog
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
@@ -72,8 +72,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./gocg.zip
-          asset_name: gocg-${{ env.GOOS }}-${{ env.GOARCH }}.zip
+          asset_path: ./cog.zip
+          asset_name: cog-${{ env.GOOS }}-${{ env.GOARCH }}.zip
           asset_content_type: application/zip
   
   builddarwin:
@@ -106,8 +106,8 @@ jobs:
           fi
       - name: Build
         run: |
-          go build -v -o gocg ./main.go 
-          zip gocg.zip gocg
+          go build -v -o cog ./main.go 
+          zip cog.zip cog
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
@@ -115,6 +115,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ env.UPLOAD_URL }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./gocg.zip
-          asset_name: gocg-${{ env.GOOS }}-${{ env.GOARCH }}.zip
+          asset_path: ./cog.zip
+          asset_name: cog-${{ env.GOOS }}-${{ env.GOARCH }}.zip
           asset_content_type: application/zip

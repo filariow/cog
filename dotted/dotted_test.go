@@ -3,7 +3,7 @@ package dotted_test
 import (
 	"testing"
 
-	"github.com/FrancescoIlario/gocg/dotted"
+	"github.com/FrancescoIlario/cog/dotted"
 	"github.com/matryer/is"
 )
 

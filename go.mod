@@ -1,4 +1,4 @@
-module github.com/FrancescoIlario/gocg
+module github.com/FrancescoIlario/cog
 
 go 1.15
 
